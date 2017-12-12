@@ -19,10 +19,16 @@ kernel headers 4.1.7-v7+ armv7l GNU/Linux
 http://www.niksula.hut.fi/~mhiienka/Rpi/linux-headers-rpi/linux-headers-4.1.7-v7%2B_4.1.7-v7%2B-2_armhf.deb
 
 # how to use
+1. select chipset name (see line 11-14 in Makefile)
+ - I use "mt7610u" (for TP-Link Archer T2U AC600)
+ - (optional) edit RT2870STA.dat
+2. use this script:
+
 ```
-$ make
-$ make install
-$ cp RT2870STA.dat /etc/Wireless/RT2870STA/RT2870STA.dat
-$ reboot
+CHIPSET=mt7610u make
+sudo make install
+cp RT2870STA.dat /etc/Wireless/RT2870STA/RT2870STA.dat
+sudo modprobe mt7610u_sta
+reboot
 ```
 
