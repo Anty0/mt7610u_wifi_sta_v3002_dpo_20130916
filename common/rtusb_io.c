@@ -476,8 +476,8 @@ NTSTATUS RTUSBWriteMACRegister(
 
 	localVal = Value;
 
-	/* MT76xx HW has 4 byte alignment constrained */    
-	if (IS_MT76xx(pAd)) {   
+	/* MT76xx HW has 4 byte alignment constrained */
+	if (IS_MT76xx(pAd)) {
 		Status = RTUSBMultiWrite_nBytes(
 		pAd,
 		Offset,
@@ -519,8 +519,9 @@ int write_reg(
 
 	if (ret) {
 		DBGPRINT(RT_DEBUG_ERROR, ("write reg fail\n"));
-		return;
+		return -1;
 	}
+    return 0;
 }
 
 int read_reg(
@@ -532,7 +533,7 @@ int read_reg(
 	int ret;
 	u8 req;
 	u32 io_value;
-	
+
 	if (base == 0x40)
 		req = 0x47;
 	else if (base == 0x41)
@@ -549,8 +550,11 @@ int read_reg(
 
 	*value = le2cpu32(io_value);
 
-	if (ret)
+	if (ret){
 		*value = 0xffffffff;
+        return -1;
+    }
+    return 0;
 }
 
 /*
@@ -612,7 +616,7 @@ NTSTATUS	RTUSBReadBBPRegister(
 	}
 
 	RTMP_SEM_EVENT_UP(&pAd->reg_atomic);
-	
+
 	if (BbpCsr.field.Busy == BUSY)
 	{
 		DBGPRINT_ERR(("BBP read R%d=0x%x fail\n", Id, BbpCsr.word));
@@ -672,7 +676,7 @@ NTSTATUS RTUSBWriteBBPRegister(
 	}
 
 	RTMP_SEM_EVENT_UP(&pAd->reg_atomic);
-	
+
 	if (BusyCnt == MAX_BUSY_COUNT)
 	{
 		DBGPRINT_ERR(("BBP write R%d=0x%x fail\n", Id, BbpCsr.word));
@@ -738,7 +742,7 @@ NTSTATUS	RTUSBWriteRFRegister(
 
 done:
 	RTMP_SEM_EVENT_UP(&pAd->reg_atomic);
-	
+
 	return status;
 }
 
@@ -1047,11 +1051,11 @@ NTSTATUS    RTUSB_VendorRequest(
 		return NDIS_STATUS_FAILURE;
 	}
 
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)) 
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("WIFI device has been disconnected\n"));
 		return NDIS_STATUS_FAILURE;
-	} 
+	}
 	else if (RTMP_TEST_PSFLAG(pAd, fRTMP_PS_MCU_SLEEP))
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("MCU has entered sleep mode\n"));
@@ -1075,7 +1079,7 @@ NTSTATUS    RTUSB_VendorRequest(
 
 		do {
 				RTUSB_CONTROL_MSG(pObj->pUsb_Dev, 0, Request, RequestType, Value, Index, pAd->UsbVendorReqBuf, TransferBufferLength, CONTROL_TIMEOUT_JIFFIES, RET);
-				
+
 			if (RET < 0 ) {
 				DBGPRINT(RT_DEBUG_OFF, ("#\n"));
 				if (RET == RTMP_USB_CONTROL_MSG_ENODEV)
@@ -1404,7 +1408,7 @@ static NTSTATUS ResetBulkInHdlr(IN PRTMP_ADAPTER pAd, IN PCmdQElmt CMDQelmt)
 	RTMPusecDelay(10000);
 	ntStatus = RTUSBReadMACRegister(pAd, MAC_CSR0, &MACValue);
 
-	/* It must be removed. Or ATE will have no RX success. */ 
+	/* It must be removed. Or ATE will have no RX success. */
 	if ((NT_SUCCESS(ntStatus) == TRUE) &&
 				(!(RTMP_TEST_FLAG(pAd, (fRTMP_ADAPTER_RESET_IN_PROGRESS | fRTMP_ADAPTER_RADIO_OFF |
 												fRTMP_ADAPTER_HALT_IN_PROGRESS | fRTMP_ADAPTER_NIC_NOT_EXIST)))))
@@ -1531,10 +1535,10 @@ static NTSTATUS DelAsicWcidHdlr(IN PRTMP_ADAPTER pAd, IN PCmdQElmt CMDQelmt)
 {
 	RT_SET_ASIC_WCID SetAsicWcid;
 	SetAsicWcid = *((PRT_SET_ASIC_WCID)(CMDQelmt->buffer));
-        
+
 	if (SetAsicWcid.WCID >= MAX_LEN_OF_MAC_TABLE)
 		return NDIS_STATUS_FAILURE;
-        
+
         AsicDelWcidTab(pAd, (UCHAR)SetAsicWcid.WCID);
 
         return NDIS_STATUS_SUCCESS;
@@ -1645,7 +1649,7 @@ static NTSTATUS UpdateProtectHdlr(IN PRTMP_ADAPTER pAd, IN PCmdQElmt CMDQelmt)
 	pAsicProtectInfo = (PRT_ASIC_PROTECT_INFO)CMDQelmt->buffer;
 	AsicUpdateProtect(pAd, pAsicProtectInfo->OperationMode, pAsicProtectInfo->SetMask,
 							pAsicProtectInfo->bDisableBGProtect, pAsicProtectInfo->bNonGFExist);
-	
+
 	return NDIS_STATUS_SUCCESS;
 }
 
@@ -1774,9 +1778,9 @@ static NTSTATUS CmdRspEventCallback(IN PRTMP_ADAPTER pAd, IN PCmdQElmt CMDQelmt)
 {
 	RXFCE_INFO_CMD *pFceInfo = CMDQelmt->buffer;
 
-	(*msg_event_handler_tb[pFceInfo->evt_type])(pAd, CMDQelmt->buffer, 
+	(*msg_event_handler_tb[pFceInfo->evt_type])(pAd, CMDQelmt->buffer,
 												CMDQelmt->bufferlength);
-	
+
 	return NDIS_STATUS_SUCCESS;
 }
 
