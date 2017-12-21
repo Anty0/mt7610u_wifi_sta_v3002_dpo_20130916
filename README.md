@@ -1,5 +1,10 @@
 # mt7610u_wifi_sta_v3002_dpo_20130916
 
+Modified to work in archlinux against kernel 4.15.4:
+
+* Builds and connects to 2.4 and 5 networks
+* Under heavy load the dongle seems to overheat and resets.
+
 Modified for RaspberryPI2 kernel 4.1.7-v7+ armv7l GNU/Linux
 * modified: os/linux/rt_linux.c
  * fix file operations
