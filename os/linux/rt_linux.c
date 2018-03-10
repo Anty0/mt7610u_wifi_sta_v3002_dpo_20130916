@@ -114,9 +114,8 @@ static inline VOID __RTMP_OS_Init_Timer(
 	IN PVOID data)
 {
 	if (!timer_pending(pTimer)) {
-		init_timer(pTimer);
-		pTimer->data = (unsigned long)data;
-		pTimer->function = function;
+		timer_setup(pTimer, function, 0);
+		// (unsigned long)data
 	}
 }
 
