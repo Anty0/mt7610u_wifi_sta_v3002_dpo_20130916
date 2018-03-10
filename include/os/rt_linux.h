@@ -55,6 +55,8 @@
 #include <linux/wireless.h>
 #include <net/iw_handler.h>
 
+#include "compat_timer.h"
+
 #ifdef INF_PPA_SUPPORT
 #include <net/ifx_ppa_api.h>
 #include <net/ifx_ppa_hook.h>
@@ -530,7 +532,7 @@ typedef struct tasklet_struct  *POS_NET_TASK_STRUCT;
 typedef struct timer_list	OS_NDIS_MINIPORT_TIMER;
 typedef struct timer_list	OS_TIMER;
 
-typedef void (*TIMER_FUNCTION)(unsigned long);
+typedef void (*TIMER_FUNCTION)(compat_timer_arg_t);
 
 
 #define OS_WAIT(_time) \
